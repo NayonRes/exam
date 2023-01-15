@@ -15,6 +15,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Timer = ({ min, sec, timeOutFunction }) => {
+  // console.log("min, sec", min, sec);
   // const {initialMinute = 0,initialSeconds = 0} = props;
   const classes = useStyles();
   const [minutes, setMinutes] = useState(min);

@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -7,24 +6,20 @@ import Slider from "react-slick";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Timer from "./Timer";
-import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import { makeStyles } from "@mui/styles";
-import MyData from "./MyData";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { arta } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import KeyboardEventHandler from "react-keyboard-event-handler";
 import ReportIcon from "@mui/icons-material/Report";
+import { useNavigate } from "react-router-dom";
+
 const useStyles = makeStyles((theme) => ({
   slickStyle: {
     "& .slick-prev": {
@@ -70,7 +65,6 @@ const useStyles = makeStyles((theme) => ({
   main: {
     background: "#079992",
     minHeight: "100vh",
-    // padding: "10px 20px",
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
@@ -78,9 +72,6 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down("xl")]: {
       padding: "10px",
     },
-    // "&:hover": {
-    //   background: "green",
-    // },
   },
   divPadding: {
     padding: "25px",
@@ -96,23 +87,307 @@ const useStyles = makeStyles((theme) => ({
       padding: "30px 24px !important",
     },
   },
+  marksTextStyle: {
+    textAlign: "center",
+    fontSize: "18px",
+    color: "#676767",
+  },
+  marksStyle: {
+    textAlign: "center",
+    fontSize: "22px",
+    color: "#888888",
+    lineHeight: "50px",
+    fontWeight: 600,
+  },
+  noteStyle: {
+    textAlign: "center",
+    fontSize: "18px !important",
+    color: "#888888",
+    lineHeight: "50px !important",
+    letterSpacing: "0.00938em",
+  },
 }));
 const QuestionPaper = () => {
+  const myData = [
+    {
+      title: `var person = {
+              age: 23,
+              getAge: function(){
+                return this.age;
+              }
+            }
+
+            var person2 = {age:  54};
+            person.getAge.call(person2);`,
+      options: [
+        { id: 1, option: "23" },
+        { id: 2, option: "54" },
+        { id: 3, option: "syntex error" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 2,
+    },
+    {
+      title: `function multiply(a,b){
+          return a*b;
+        }
+
+        function currying(fn){
+          return function(a){
+            return function(b){
+              return fn(a,b);
+            }
+          }
+        }
+
+        var curriedMultiply = currying(multiply);
+        curriedMultiply(4)(3)
+        `,
+      options: [
+        { id: 1, option: "12" },
+        { id: 2, option: "144" },
+        { id: 3, option: "syntex error" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 1,
+    },
+    {
+      title: `function divideByHalf(sum){
+          console.log(Math.floor(sum / 2));
+        }
+
+        function multiplyBy2(sum){
+          console.log(sum * 2);
+        }
+
+        function operationOnSum(num1,num2,operation){
+          var sum = num1 + num2;
+          operation(sum);
+        }
+
+        operationOnSum(3, 3, divideByHalf);`,
+      options: [
+        { id: 1, option: "3" },
+        { id: 2, option: "20" },
+        { id: 3, option: "syntex error" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 1,
+    },
+    {
+      title: `function divideByHalf(sum){
+          console.log(Math.floor(sum / 2));
+        }
+
+        function multiplyBy2(sum){
+          console.log(sum * 2);
+        }
+
+        function operationOnSum(num1,num2,operation){
+          var sum = num1 + num2;
+          operation(sum);
+        }
+
+        operationOnSum(5, 5, multiplyBy2);`,
+      options: [
+        { id: 1, option: "3" },
+        { id: 2, option: "20" },
+        { id: 3, option: "syntex error" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 2,
+    },
+    {
+      title: `function computeSum(arr){
+          if(arr.length === 1){
+            return arr[0];
+          }
+          else{
+            return arr.pop() + computeSum(arr);
+          }
+        }
+
+        computeSum([7, 8, 9, 99]);`,
+      options: [
+        { id: 1, option: "123" },
+        { id: 2, option: "undefine" },
+        { id: 3, option: "syntex error" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 1,
+    },
+    {
+      title: `var obj1 = {
+          valueOfThis: function(){
+            return this;
+          }
+        }
+        var obj2 = {
+          valueOfThis: ()=>{
+            return this;
+          }
+        }
+
+        obj1.valueOfThis();`,
+      options: [
+        { id: 1, option: "Will return the object obj1" },
+        { id: 2, option: "undefine" },
+        { id: 3, option: "syntex error" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 1,
+    },
+    {
+      title: `var obj1 = {
+          valueOfThis: function(){
+            return this;
+          }
+        }
+        var obj2 = {
+          valueOfThis: ()=>{
+            return this;
+          }
+        }
+
+        obj2.valueOfThis();`,
+      options: [
+        { id: 1, option: "Will return the object obj1" },
+        { id: 2, option: "Will return window/global object" },
+        { id: 3, option: "undefine" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 2,
+    },
+    {
+      title: `var variable1 = 23;
+
+      let variable2 = 89;
+
+      function catchValues(){
+        console.log(variable1);
+        console.log(variable2);
+      }
+
+      window.variable1;`,
+      options: [
+        { id: 1, option: "syntex error" },
+        { id: 2, option: "23" },
+        { id: 3, option: "undefine" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 2,
+    },
+    {
+      title: `var variable1 = 23;
+
+      let variable2 = 89;
+
+      function catchValues(){
+        console.log(variable1);
+        console.log(variable2);
+      }
+
+      window.variable2;`,
+      options: [
+        { id: 1, option: "syntex error" },
+        { id: 2, option: "23" },
+        { id: 3, option: "undefine" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 3,
+    },
+    {
+      title: `function extractingArgs(...args){
+          return args[1];
+        }
+
+        function addAllArgs(...args){
+          let sumOfArgs = 0;
+          let i = 0;
+          while(i < args.length){
+            sumOfArgs += args[i];
+            i++;
+          }
+          return sumOfArgs;
+        }
+        addAllArgs(6, 5, 7, 99);`,
+      options: [
+        { id: 1, option: "117" },
+        { id: 2, option: "8" },
+        { id: 3, option: "undefine" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 1,
+    },
+    {
+      title: `function extractingArgs(...args){
+          return args[1];
+        }
+
+        function addAllArgs(...args){
+          let sumOfArgs = 0;
+          let i = 0;
+          while(i < args.length){
+            sumOfArgs += args[i];
+            i++;
+          }
+          return sumOfArgs;
+        }
+        addAllArgs(1, 3, 4);`,
+      options: [
+        { id: 1, option: "117" },
+        { id: 2, option: "8" },
+        { id: 3, option: "undefine" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 2,
+    },
+    {
+      title: `const classDetails = {
+          strength: 78,
+          benches: 39,
+          blackBoard:1
+        }
+
+        const {strength:classStrength, benches:classBenches,blackBoard:classBlackBoard} = classDetails;
+        console.log(classStrength);`,
+      options: [
+        { id: 1, option: "true" },
+        { id: 2, option: "false" },
+        { id: 3, option: "undefine" },
+        { id: 4, option: "type error" },
+      ],
+      selectedOption: "",
+      answerId: 2,
+    },
+  ];
+
   const customSlider = useRef();
   const classes = useStyles();
-  const [data, setData] = useState(MyData);
+  let navigate = useNavigate();
+  const [data, setData] = useState([]);
   const [activeSlideNo, setActiveSlideNo] = useState(0);
   const [refress, setRefress] = useState(false);
   const [open, setOpen] = useState(false);
-  const [exit, setExit] = useState(false);
   const [keyboard, setKeyboard] = useState(true);
   const [checkMessage, setCheckMessage] = useState("");
   const [remainingQuestionNo, setRemainingQuestionNo] = useState([]);
   const [obtainedMarks, setObtainedMarks] = useState();
+  const [examTime, setExamTime] = useState({ min: 30, sec: 0 });
 
   const handleClose = () => {
     setOpen(false);
-    setExit(false);
     setKeyboard(false);
   };
 
@@ -141,15 +416,15 @@ const QuestionPaper = () => {
     try {
       let totalMarks = 0;
 
-      data.map((item, i) => {
+      data.map((item) => {
         if (item.selectedOption === item.answerId) {
           totalMarks += 5;
         }
       });
 
       setObtainedMarks(totalMarks);
+      navigate("/result", { state: { marks: totalMarks } });
       setOpen(false);
-      setExit(true);
     } catch (error) {
       console.log(error);
     }
@@ -167,39 +442,26 @@ const QuestionPaper = () => {
   const timeOutFunction = () => {
     handleSubmit();
   };
-
-  const fullScreen = () => {
-    var goFS = document.getElementById("goFS");
-    goFS.addEventListener(
-      "click",
-      function () {
-        document.body.requestFullscreen();
-      },
-      false
-    );
-  };
   useEffect(() => {
-    // fullScreen will not work in useEffect. browser API only work when user click.
-    // fullScreen();
+    setData(myData);
   }, []);
 
   return (
     <div className={classes.main}>
-      {/* <button id="goFS">Go fullscreen</button> */}
       <KeyboardEventHandler
         handleKeys={["all"]}
         handleFocusableElements
         onKeyEvent={(key, e) => setKeyboard(true)}
       />
 
-      {/* <div
-          style={{ height: "3px", background: "red" }}
-          onMouseOver={() => setKeyboard(true)}
-        ></div> */}
       <div style={{ padding: "0px 20px" }}>
         <p className={classes.title}>Remaining Time</p>
 
-        <Timer min={30} sec={0} timeOutFunction={timeOutFunction} />
+        <Timer
+          min={examTime.min}
+          sec={examTime.sec}
+          timeOutFunction={timeOutFunction}
+        />
 
         <Grid container spacing={1}>
           <Grid item xs={0} sm={0} md={1} lg={1} xl={2}></Grid>
@@ -218,7 +480,7 @@ const QuestionPaper = () => {
                       <h2 style={{ margin: 0, fontWeight: 400 }}>
                         Question No: {i + 1}
                       </h2>
-                      {/* <p>Find out the output</p> */}
+
                       <SyntaxHighlighter
                         language="javascript"
                         wrapLines={true}
@@ -320,40 +582,6 @@ const QuestionPaper = () => {
                 borderRadius: "5px",
               }}
             >
-              {/* <Grid item xs={5.5}>
-              <Button
-                fullWidth
-                variant="outlined"
-                className={classes.buttonStyle}
-                onClick={() => customSlider.current.slickPrev()}
-              >
-                Previous
-              </Button>
-            </Grid>
-            <Grid item xs={1}></Grid>
-            <Grid item xs={5.5}>
-              <Button
-                fullWidth
-                variant="outlined"
-                className={classes.buttonStyle}
-                onClick={() => customSlider.current.slickNext()}
-              >
-                Next
-              </Button>
-            </Grid>
-            <Grid item xs={12}>
-              <br />
-              <Button
-                fullWidth
-                variant="contained"
-                disableElevation
-                className={classes.buttonStyle}
-                onClick={() => customSlider.current.slickNext()}
-              >
-                Submit Question
-              </Button>
-            </Grid> */}
-
               <Grid container columnSpacing={1}>
                 <Grid item xs={12}>
                   <h4
@@ -459,12 +687,7 @@ const QuestionPaper = () => {
           <DialogContent className={classes.DialogContentStyle}>
             <DialogContentText
               id="alert-dialog-description"
-              style={{
-                textAlign: "center",
-                fontSize: "18px",
-                color: "#888888",
-                lineHeight: "50px",
-              }}
+              className={classes.noteStyle}
             >
               <ReportIcon style={{ fontSize: "120px", color: "#f6b93b" }} />
               <br />
@@ -492,58 +715,7 @@ const QuestionPaper = () => {
             </Button>
           </DialogActions>
         </Dialog>
-        <Dialog
-          open={exit}
-          onClose={handleClose}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogContent className={classes.DialogContentStyle}>
-            <DialogContentText
-              id="alert-dialog-description"
-              style={{
-                textAlign: "center",
-                fontSize: "18px",
-                color: "#888888",
-                lineHeight: "50px",
-              }}
-            >
-              {/* {checkMessage} */}
-              Your obtained marks is <br />
-              <span
-                style={{
-                  fontSize: "50px",
-                  color: "#676767",
-                  wordBreak: "break-all",
-                }}
-              >
-                {obtainedMarks}
-              </span>
-            </DialogContentText>
-          </DialogContent>
-
-          <DialogActions
-            style={{
-              justifyContent: "center",
-              background: "#079992",
-              padding: 0,
-            }}
-          >
-            <Button
-              fullWidth
-              onClick={handleClose}
-              autoFocus
-              className={classes.dialogButton}
-            >
-              Exit Exam
-            </Button>
-          </DialogActions>
-        </Dialog>
       </div>
-      {/* <div
-          style={{ height: "3px", background: "red" }}
-          onMouseOver={() => setKeyboard(true)}
-        ></div> */}
     </div>
   );
 };
